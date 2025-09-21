@@ -39,3 +39,55 @@ First, clone the repository to your computer:
 ```bash
 git clone [https://github.com/NaveenCK-10/DailyThoughts-blog-app.git](https://github.com/NaveenCK-10/DailyThoughts-blog-app.git)
 cd DailyThoughts-blog-app
+
+# Go into the backend folder
+cd backend
+
+# Install the necessary packages
+npm install
+
+You'll also need to create a .env file in the /backend folder. It just needs two things:
+
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_secret_key_for_tokens
+
+Once that's done, you can start the server:
+node server.js
+
+3. Set Up the Frontend
+# In a new terminal, go into the frontend folder
+cd frontend
+
+# Install the necessary packages
+npm install
+
+# Start the development server
+npm run dev
+
+The app should now be running in your browser!
+
+
+
+🔌 API Endpoints
+The backend provides the following REST API endpoints:
+
+Auth
+Method	Endpoint	Description	Requires Auth
+POST	/auth/signup	Register a new user.	No
+POST	/auth/login	Log in a user and get a token.	No
+
+Export to Sheets
+Blogs
+Method	Endpoint	Description	Requires Auth
+GET	/blogs	Get all blogs (supports search & pagination).	No
+POST	/blogs	Create a new blog post.	Yes
+GET	/blogs/:id	Get a single blog post by its ID.	No
+PUT	/blogs/:id	Update a blog post.	Yes (Author)
+DELETE	/blogs/:id	Delete a blog post.	Yes (Author)
+
+Export to Sheets
+Profiles
+Method	Endpoint	Description	Requires Auth
+GET	/profile/:userId	Get a user's profile and all their posts.	No
+
+Export to Sheets
