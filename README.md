@@ -86,3 +86,51 @@ npm run dev**
 | GET    | /profile/:userId | Get a user's profile and their posts | No           |
 
 ---
+## How It’s Built
+
+### Backend
+- **Mongoose Models:** `User` and `Blog`, with `Blog.authorId` referencing `User`. Author names are populated on list/detail routes to avoid extra frontend queries.  
+- **JWT Middleware:** Reads the `Authorization` header, trims the `"Bearer "` prefix if present, and verifies tokens with a shared secret.  
+- **CORS:** Explicit origin allowlist plus `Authorization` header to handle browser preflights.  
+
+**Strengthening the Backend (`server.js`)**  
+While the backend structure, routes, and logic were implemented manually, I used AI assistance to **strengthen `server.js`**. AI helped with:  
+- Optimizing route structure and error handling  
+- Handling edge cases in authentication and token verification  
+- Debugging middleware and CORS issues  
+- Ensuring consistency between backend payloads and frontend expectations  
+
+This made the backend **robust and reliable**, while all core design and implementation decisions were made by me.
+
+### Frontend
+- **Redux Toolkit:** Manages blog list and details with async thunks.  
+- **Axios:** Adds `Authorization: Bearer <token>` for protected routes.  
+- **Home Page Search:** Simple form reloads `/blogs` with query parameters for filtering.  
+
+---
+
+## AI Assistance & Prompting Techniques
+AI tools (ChatGPT, GitHub Copilot) were used **alongside manual coding** to:  
+
+- Debug errors and resolve **conflict issues**  
+- Suggest improvements in backend middleware and server structure  
+- Provide code snippets for specific problems, like JWT verification or CORS configuration  
+- Ensure backend and frontend state align correctly  
+
+**Prompting techniques that worked well:**  
+- `"Here’s the exact error text. Suggest a minimal fix that keeps items an array."`  
+- `"CORS preflight with Authorization failing from this origin. Provide a working server.js snippet."`  
+- `"Optimize backend server.js for authentication and error handling."`  
+
+Even with AI suggestions, **all logic, models, and architecture were designed and implemented by me**.
+
+---
+
+## Challenges and Solutions
+- **CORS Preflight Failures:** Fixed by explicit origin allowlist and allowed `Authorization` header.  
+- **Malformed Tokens:** Extracted safely by checking for `"Bearer "` prefix on the server.  
+- **Payload Shape Drift:** Normalized payloads in reducers and kept server response consistent.  
+
+---
+
+
