@@ -9,10 +9,20 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
-// CORS guest list and preflight allowances
+// --- Final CORS Configuration ---
+// This is the most robust way to handle CORS for a deployed application.
+const allowedOrigins = ["http://localhost:5173", "https://daily-thoughts-blog-app.vercel.app"];
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://daily-thoughts-blog-app.vercel.app"],
+    origin: function (origin, callback) {
+      // allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) === -1) {
+        const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+        return callback(new Error(msg), false);
+      }
+      return callback(null, true);
+    },
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
@@ -50,7 +60,6 @@ const blogSchema = new mongoose.Schema(
 const Blog = mongoose.model("Blog", blogSchema);
 
 // --- Middleware (Hardened) ---
-// Accepts Bearer tokens and supports Authorization headers that browsers preflight
 const auth = (req, res, next) => {
   const header = req.headers.authorization;
   if (!header) return res.status(401).json({ error: "No token provided" });
@@ -63,6 +72,11 @@ const auth = (req, res, next) => {
     return res.status(403).json({ error: "Invalid token" });
   }
 }; 
+
+// --- Health Check Route ---
+app.get("/", (req, res) => {
+  res.send("DailyThoughts Backend is running!");
+});
 
 // --- Auth Routes ---
 app.post("/auth/signup", async (req, res) => {
@@ -212,4 +226,3 @@ app.get("/profile/:userId", async (req, res) => {
 // --- Server Start ---
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
-
