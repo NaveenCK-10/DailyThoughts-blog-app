@@ -2,7 +2,7 @@
 
 **Live Demo:** [Link to be added after you deploy]  
 ![Screenshot of the DailyThoughts homepage](https://github.com/NaveenCK-10/DailyThoughts-blog-app/blob/main/Screenshot%202025-09-21%20214221.png)  
-*(You can replace this with a real screenshot of your app after deploying)*
+
 
 ---
 
@@ -13,7 +13,7 @@ It was built using the **MERN stack (MongoDB, Express, React, Node.js)** and inc
 
 ---
 
-## ✅ Features
+## Features
 
 ### Core Features Implemented
 - **User Authentication:** Secure user signup and login with JWT-based session handling.
@@ -25,7 +25,7 @@ It was built using the **MERN stack (MongoDB, Express, React, Node.js)** and inc
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 - **Frontend:** React, Redux Toolkit, React Router, Axios, Vite  
 - **Backend:** Node.js, Express.js  
 - **Database:** MongoDB with Mongoose  
@@ -33,31 +33,31 @@ It was built using the **MERN stack (MongoDB, Express, React, Node.js)** and inc
 
 ---
 
-## 🚀 Setup Instructions
+## Setup Instructions
 
 ### 1. Get the Code
-Clone the repository to your computer:
-git clone https://github.com/NaveenCK-10/DailyThoughts-blog-app.git
+**Clone the repository to your computer:**
+**git clone https://github.com/NaveenCK-10/DailyThoughts-blog-app.git**
 cd DailyThoughts-blog-app
 
 ### 2. Set Up the Backend
 cd backend
 npm install
 
-Create a `.env` file inside the **/backend** folder with the following:
+**Create a `.env` file inside the **/backend** folder with the following:**
 MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_secret_key_for_tokens
 
-Start the backend server:
+**Start the backend server:**
 node server.js
 
 ### 3. Set Up the Frontend
-In a new terminal:
-cd frontend
+**In a new terminal:**
+**cd frontend
 npm install
-npm run dev
+npm run dev**
 
-The app should now be running in your browser 🚀
+**The app should now be running in your browser !!**
 
 ---
 
@@ -84,9 +84,3 @@ The app should now be running in your browser 🚀
 | GET    | /profile/:userId | Get a user's profile and their posts | No           |
 
 ---
-
-## 📌 Future Improvements
-- Add image upload support for blogs.
-- Rich-text editor for creating posts.
-- Like/Comment functionality.
-- Dark mode for better UI experience.
