@@ -37,6 +37,7 @@ It was built using the **MERN stack (MongoDB, Express, React, Node.js)** and inc
 
 ### 1. Get the Code
 **Clone the repository to your computer:**
+
 **git clone https://github.com/NaveenCK-10/DailyThoughts-blog-app.git**
 cd DailyThoughts-blog-app
 
