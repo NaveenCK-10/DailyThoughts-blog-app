@@ -8,14 +8,15 @@ import bcrypt from "bcrypt";
 dotenv.config();
 const app = express();
 app.use(express.json());
+
+// CORS guest list and preflight allowances
 app.use(
   cors({
-    // Remember to replace this with your actual Vercel domain for production
-    origin: ["http://localhost:5173", "https://your-frontend-domain.vercel.app"],
+    origin: ["http://localhost:5173", "https://daily-thoughts-blog-app.vercel.app"],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
-);
+); 
 
 mongoose
   .connect(process.env.MONGO_URI)
@@ -48,14 +49,12 @@ const blogSchema = new mongoose.Schema(
 );
 const Blog = mongoose.model("Blog", blogSchema);
 
-// --- Middleware (Corrected Token Parsing) ---
+// --- Middleware (Hardened) ---
+// Accepts Bearer tokens and supports Authorization headers that browsers preflight
 const auth = (req, res, next) => {
   const header = req.headers.authorization;
   if (!header) return res.status(401).json({ error: "No token provided" });
-  
-  // Handles both "Bearer <token>" and just "<token>"
   const token = /^Bearer\s+/i.test(header) ? header.split(" ")[1] : header;
-
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
@@ -63,7 +62,7 @@ const auth = (req, res, next) => {
   } catch (err) {
     return res.status(403).json({ error: "Invalid token" });
   }
-};
+}; 
 
 // --- Auth Routes ---
 app.post("/auth/signup", async (req, res) => {
@@ -110,6 +109,7 @@ app.get("/blogs", async (req, res) => {
     const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
     const limit = Math.max(Math.min(parseInt(req.query.limit, 10) || 10, 50), 1);
     const search = req.query.search;
+
     let query = {};
     if (search) {
       query = {
@@ -119,6 +119,7 @@ app.get("/blogs", async (req, res) => {
         ],
       };
     }
+
     const [blogs, totalPosts] = await Promise.all([
       Blog.find(query)
         .populate("authorId", "name")
@@ -127,6 +128,7 @@ app.get("/blogs", async (req, res) => {
         .limit(limit),
       Blog.countDocuments(query),
     ]);
+
     res.json({
       blogs,
       totalPages: Math.ceil(totalPosts / limit),
@@ -207,6 +209,7 @@ app.get("/profile/:userId", async (req, res) => {
   }
 });
 
+// --- Server Start ---
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
 
