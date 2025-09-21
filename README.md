@@ -110,7 +110,7 @@ This made the backend **robust and reliable**, while all core design and impleme
 ---
 
 ## AI Assistance & Prompting Techniques
-AI tools (ChatGPT, GitHub Copilot) were used **alongside manual coding** to:  
+AI tools (ChatGPT, Gemini) were used **alongside manual coding** to:  
 
 - Debug errors and resolve **conflict issues**  
 - Suggest improvements in backend middleware and server structure  
