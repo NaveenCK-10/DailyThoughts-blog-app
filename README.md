@@ -1,8 +1,8 @@
-# DailyThoughts - A Full-Stack Blog Platform
+# DailyThoughts – Full-Stack Blogging Platform
 
-**Live Demo:** https://daily-thoughts-blog-app.vercel.app/
-![Screenshot of the DailyThoughts homepage](https://github.com/NaveenCK-10/DailyThoughts-blog-app/blob/main/Screenshot%202025-09-21%20214221.png)  
+**Live Demo:** [https://daily-thoughts-blog-app.vercel.app/](https://daily-thoughts-blog-app.vercel.app/)  
 
+![DailyThoughts Homepage](https://github.com/NaveenCK-10/DailyThoughts-blog-app/blob/main/Screenshot%202025-09-21%20214221.png)  
 
 ---
 
@@ -63,7 +63,7 @@ npm run dev**
 
 ---
 
-## 🔌 API Endpoints
+## API Endpoints
 
 ### Auth
 | Method | Endpoint      | Description                | Requires Auth |
