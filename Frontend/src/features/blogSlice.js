@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const API = "http://localhost:5000";
+const API = "https://dailythoughts-backend-mfkx.onrender.com";
 
 // 1. THIS ACTION IS NOW UPDATED FOR SEARCH
 export const fetchBlogs = createAsyncThunk(
