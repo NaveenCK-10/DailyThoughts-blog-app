@@ -1,4 +1,3 @@
-// backend/server.js
 import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
@@ -9,56 +8,72 @@ import bcrypt from "bcrypt";
 dotenv.config();
 const app = express();
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    // Remember to replace this with your actual Vercel domain for production
+    origin: ["http://localhost:5173", "https://your-frontend-domain.vercel.app"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
-
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB Connected"))
-  .catch(err => {
-    console.error(" MongoDB Connection Failed:", err.message);
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log("✅ MongoDB Connected"))
+  .catch((err) => {
+    console.error("❌ MongoDB Connection Failed:", err.message);
     process.exit(1);
   });
 
-
+// --- Schemas and Models ---
 const userSchema = new mongoose.Schema({
   name: String,
-  email: { type: String, unique: true },
+  email: { type: String, unique: true, required: true },
   passwordHash: String,
   bio: String,
   profilePic: String,
 });
 const User = mongoose.model("User", userSchema);
 
-const blogSchema = new mongoose.Schema({
-  title: String,
-  content: String,
-  tags: [String],
-  image: String,
-  authorId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-  likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }] // <-- ADD THIS LINE
-}, { timestamps: true });
+const blogSchema = new mongoose.Schema(
+  {
+    title: String,
+    content: String,
+    tags: [String],
+    image: String,
+    authorId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  },
+  { timestamps: true }
+);
+const Blog = mongoose.model("Blog", blogSchema);
 
+// --- Middleware (Corrected Token Parsing) ---
 const auth = (req, res, next) => {
-  const token = req.headers["authorization"];
-  if (!token) return res.status(401).json({ error: "No token provided" });
-  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-    if (err) return res.status(403).json({ error: "Invalid token" });
+  const header = req.headers.authorization;
+  if (!header) return res.status(401).json({ error: "No token provided" });
+  
+  // Handles both "Bearer <token>" and just "<token>"
+  const token = /^Bearer\s+/i.test(header) ? header.split(" ")[1] : header;
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
     next();
-  });
+  } catch (err) {
+    return res.status(403).json({ error: "Invalid token" });
+  }
 };
 
-
+// --- Auth Routes ---
 app.post("/auth/signup", async (req, res) => {
   try {
     const { name, email, password } = req.body;
     const existing = await User.findOne({ email });
     if (existing) return res.status(400).json({ error: "Email already in use" });
-
     const hash = await bcrypt.hash(password, 10);
     const user = new User({ name, email, passwordHash: hash });
     await user.save();
-
     res.json({ message: "User created successfully" });
   } catch (err) {
     res.status(500).json({ error: "Signup failed", details: err.message });
@@ -70,22 +85,16 @@ app.post("/auth/login", async (req, res) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ error: "User not found" });
-
     const valid = await bcrypt.compare(password, user.passwordHash);
     if (!valid) return res.status(400).json({ error: "Invalid password" });
-
-    const token = jwt.sign(
-      { id: user._id, email: user.email },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" }
-    );
+    const token = jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: "1h" });
     res.json({ token });
   } catch (err) {
     res.status(500).json({ error: "Login failed", details: err.message });
   }
 });
 
-
+// --- Blog Routes ---
 app.post("/blogs", auth, async (req, res) => {
   try {
     const blog = new Blog({ ...req.body, authorId: req.user.id });
@@ -96,25 +105,38 @@ app.post("/blogs", auth, async (req, res) => {
   }
 });
 
-// The updated code (with search)
 app.get("/blogs", async (req, res) => {
   try {
-    const { search } = req.query;
+    const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+    const limit = Math.max(Math.min(parseInt(req.query.limit, 10) || 10, 50), 1);
+    const search = req.query.search;
     let query = {};
-
     if (search) {
       query = {
         $or: [
-          { title: { $regex: search, $options: "i" } }, // Case-insensitive search on title
-          { tags: { $regex: search, $options: "i" } },  // Case-insensitive search on tags
+          { title: { $regex: search, $options: "i" } },
+          { tags: { $regex: search, $options: "i" } },
         ],
       };
     }
-
-    const blogs = await Blog.find(query).populate("authorId", "name");
-    res.json(blogs);
+    const [blogs, totalPosts] = await Promise.all([
+      Blog.find(query)
+        .populate("authorId", "name")
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit),
+      Blog.countDocuments(query),
+    ]);
+    res.json({
+      blogs,
+      totalPages: Math.ceil(totalPosts / limit),
+      currentPage: page,
+      totalPosts,
+      limit,
+    });
   } catch (err) {
-    res.status(500).json({ error: "Fetch blogs failed", details: err.message });
+    console.error("CRITICAL ERROR in GET /blogs:", err);
+    res.status(500).json({ error: "Fetch blogs failed" });
   }
 });
 
@@ -132,11 +154,9 @@ app.put("/blogs/:id", auth, async (req, res) => {
   try {
     const blog = await Blog.findById(req.params.id);
     if (!blog) return res.status(404).json({ error: "Blog not found" });
-
     if (blog.authorId.toString() !== req.user.id) {
       return res.status(403).json({ error: "Not allowed" });
     }
-
     Object.assign(blog, req.body);
     await blog.save();
     res.json(blog);
@@ -149,39 +169,25 @@ app.delete("/blogs/:id", auth, async (req, res) => {
   try {
     const blog = await Blog.findById(req.params.id);
     if (!blog) return res.status(404).json({ error: "Blog not found" });
-
     if (blog.authorId.toString() !== req.user.id) {
       return res.status(403).json({ error: "Not allowed" });
     }
-
     await blog.deleteOne();
-    res.json({ message: " Blog deleted" });
+    res.json({ message: "Blog deleted" });
   } catch (err) {
     res.status(500).json({ error: "Delete blog failed", details: err.message });
   }
 });
 
-// ADD THIS ENTIRE NEW ROUTE
 app.put("/blogs/:id/like", auth, async (req, res) => {
   try {
     const blog = await Blog.findById(req.params.id);
-    if (!blog) {
-      return res.status(404).json({ error: "Blog not found" });
-    }
-
+    if (!blog) return res.status(404).json({ error: "Blog not found" });
     const userId = req.user.id;
-    const userIndex = blog.likes.indexOf(userId);
-
-    if (userIndex === -1) {
-      // If user has not liked, add their ID to the likes array
-      blog.likes.push(userId);
-    } else {
-      // If user has already liked, remove their ID (toggle)
-      blog.likes.splice(userIndex, 1);
-    }
-
+    const idx = blog.likes.findIndex((u) => (u.equals ? u.equals(userId) : String(u) === String(userId)));
+    if (idx === -1) blog.likes.push(userId);
+    else blog.likes.splice(idx, 1);
     await blog.save();
-    // Repopulate author info before sending back
     const updatedBlog = await Blog.findById(blog._id).populate("authorId", "name");
     res.json(updatedBlog);
   } catch (err) {
@@ -191,13 +197,9 @@ app.put("/blogs/:id/like", auth, async (req, res) => {
 
 app.get("/profile/:userId", async (req, res) => {
   try {
-    const user = await User.findById(req.params.userId).select('-passwordHash');
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
+    const user = await User.findById(req.params.userId).select("-passwordHash");
+    if (!user) return res.status(404).json({ error: "User not found" });
     const blogs = await Blog.find({ authorId: req.params.userId }).populate("authorId", "name");
-
     res.json({ user, blogs });
   } catch (error) {
     console.error(error);
@@ -206,4 +208,5 @@ app.get("/profile/:userId", async (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
+
