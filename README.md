@@ -1,6 +1,6 @@
 # DailyThoughts - A Full-Stack Blog Platform
 
-**Live Demo:** [Link to be added after you deploy]  
+**Live Demo:** https://daily-thoughts-blog-app.vercel.app/
 ![Screenshot of the DailyThoughts homepage](https://github.com/NaveenCK-10/DailyThoughts-blog-app/blob/main/Screenshot%202025-09-21%20214221.png)  
 
 
