@@ -1,6 +1,7 @@
 # DailyThoughts – Full-Stack Blogging Platform
 
 **Live Demo:** [https://daily-thoughts-blog-app.vercel.app/](https://daily-thoughts-blog-app.vercel.app/)  
+**Backend URL** [https://dailythoughts-backend-mfkx.onrender.com](https://dailythoughts-backend-mfkx.onrender.com)
 
 ![DailyThoughts Homepage](https://github.com/NaveenCK-10/DailyThoughts-blog-app/blob/main/Screenshot%202025-09-21%20214221.png)  
 
