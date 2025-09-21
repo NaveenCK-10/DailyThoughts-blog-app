@@ -3,7 +3,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const API = "http://localhost:5000";
+const API = "https://dailythoughts-backend-mfkx.onrender.com";
 
 export const fetchProfile = createAsyncThunk(
   "profile/fetch",
