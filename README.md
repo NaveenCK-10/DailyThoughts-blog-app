@@ -2,7 +2,7 @@
 
 **Live Demo:** [Link to be added after you deploy]
 
-![Screenshot of the DailyThoughts homepage](https://i.imgur.com/example.png)
+![Screenshot of the DailyThoughts homepage](https://github.com/NaveenCK-10/DailyThoughts-blog-app/blob/main/Screenshot%202025-09-21%20214221.png)
 *(You can replace this with a real screenshot of your app after deploying)*
 
 ---
